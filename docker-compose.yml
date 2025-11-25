@@ -1,0 +1,142 @@
+version: '3.8'
+
+services:
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    ports:
+      - "7878:7878"
+    environment:
+      - PUID=1000  # Change to match your user ID
+      - PGID=3000  # Change to match your group ID
+      - TZ=Europe/Zagreb  # Change to your timezone, e.g., America/New_York
+    volumes:
+      - /apps/radarr/config:/config
+      - /plex/Filmovi:/movies
+      - plex_downloads:/downloads
+    networks:
+      - media_network
+
+  transmission: 
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission 
+    restart: unless-stopped
+    ports: 
+      - "9091:9091"
+      - "51413:51413"
+      - "51413:51413/udp"
+    environment: 
+      - PUID=1000
+      - PGID=3000
+      - TZ=Europe/Zagreb
+    volumes: 
+      - /apps/transmission/config:/config
+      - /plex/Torrent:/downloads
+      - /apps/transmission/watch:/watch
+    networks: 
+      - media_network
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    ports:
+      - "8989:8989"
+    environment:
+      - PUID=1000  # Change to match your user ID
+      - PGID=3000  # Change to match your group ID
+      - TZ=Europe/Zagreb  # Change to your timezone, e.g., America/New_York
+    volumes:
+      - /apps/sonarr/config:/config
+      - /plex/Serije:/tv
+      - plex_downloads:/downloads
+    networks:
+      - media_network
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    ports:
+      - "9696:9696"
+    environment:
+      - PUID=1000  # Change to match your user ID
+      - PGID=3000  # Change to match your group ID
+      - TZ=Europe/Zagreb  # Change to your timezone, e.g., America/New_York
+    volumes:
+      - /apps/prowlarr/config:/config
+    networks:
+      - media_network
+
+  ombi:
+    image: lscr.io/linuxserver/ombi:latest
+    container_name: ombi
+    restart: unless-stopped
+    ports:
+      - "3579:3579"
+    environment:
+      - PUID=1000  # Change to match your user ID
+      - PGID=3000  # Change to match your group ID
+      - TZ=Europe/Zagreb  # Change to your timezone, e.g., America/New_York
+    volumes:
+      - /apps/ombi/config:/config
+    networks:
+      - media_network
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+    ports:
+      - "6767:6767"
+    environment:
+      - PUID=1000  # Change to match your user ID
+      - PGID=3000  # Change to match your group ID
+      - TZ=Europe/Zagreb  # Change to your timezone, e.g., America/New_York
+    volumes:
+      - /apps/bazarr/config:/config
+      - /plex/Filmovi:/movies
+      - /plex/Serije:/tv
+    networks:
+      - media_network
+
+  xteve:
+    image: docker.io/dnsforge/xteve:latest
+    container_name: xteve
+    restart: unless-stopped
+    ports:
+      - "34400:34400"
+    environment:
+      - PUID=1000  # Change to match your user ID
+      - PGID=3000  # Change to match your group ID
+      - TZ=Europe/Zagreb  # Change to your timezone, e.g., America/New_York
+    volumes:
+      - /apps/xteve/config:/config
+    networks:
+      - media_network
+  
+  basobot: 
+    image: docker.io/matejbasic/baso_bot:77
+    container_name: baso_bot
+
+
+volumes:
+  plex_movies: 
+    driver: local 
+    driver_opts: 
+      type: "nfs" 
+      o: "addr=10.0.0.10,nolock,soft,rw"
+      device: ":/mnt/RAIDZ2/Plex/PlexMedia/Filmovi"
+
+  plex_downloads: 
+    driver: local 
+    driver_opts: 
+      type: "nfs" 
+      o: "addr=10.0.0.10,nolock,soft,rw"
+      device: ":/mnt/RAIDZ2/Plex/PlexMedia/Torrent/"
+
+networks:
+  media_network:
+    driver: bridge
+
