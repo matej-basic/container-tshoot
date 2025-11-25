@@ -116,10 +116,6 @@ services:
     networks:
       - media_network
   
-  basobot: 
-    image: docker.io/matejbasic/baso_bot:77
-    container_name: baso_bot
-
 
 volumes:
   plex_movies: 
