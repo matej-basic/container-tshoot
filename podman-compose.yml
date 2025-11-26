@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  # MySQL baza podataka
+  db:
+    image: mysql:8
+    container_name: wordpress_db
+    environment:
+      MYSQL_ROOT_PASSWORD: example   # Root password za MySQL
+      MYSQL_DATABASE: wordpress      # Preddefiniraj bazu
+      MYSQL_USER: wordpress_user     # Kreira korisnika
+      MYSQL_PASSWORD: wordpress_pass # Kreira korisničku lozinku
+    volumes:
+      - db_data:/var/lib/mysql  # Povezivanje s volume-om za pohranu podataka
+    networks:
+      - wordpress_net
+
+  # WordPress
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress_app
+    depends_on:
+      - db  # WordPress ovisi o bazi
+    ports:
+      - "8080:80"  # Izlaganje WordPressa na portu 8080
+    environment:
+      WORDPRESS_DB_HOST: db:3306  # Povezivanje na MySQL bazu
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: wordpress_pass
+    volumes:
+      - wordpress_data:/var/www/html  # Povezivanje za pohranu WordPress podataka
+    networks:
+      - wordpress_net
+
+# Volumes za pohranu podataka (persistent storage)
+volumes:
+  db_data:
+  wordpress_data:
+
+# Definicija mreže za međusobnu komunikaciju kontejnera
+networks:
+  wordpress_net:
+    driver: bridge
